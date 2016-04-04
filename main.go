@@ -3,14 +3,21 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/whereswaldon/sdb/speech"
 	"os"
 )
 
+/**
+main launches sdb
+*/
 func main() {
 	incoming := make(chan string)
 	outgoing := make(chan string)
+	//launch font end
 	go listen(incoming)
+	//launch data processing
 	go compose(incoming, outgoing)
+	//transition into output routine
 	speak(outgoing)
 }
 
@@ -33,10 +40,8 @@ channel
 */
 func compose(toProcessing, fromProcessing chan string) {
 	for {
-		//for now, immediately pass on input
 		input := <-toProcessing
-		//fmt.Printf("input: %s", input)
-		fromProcessing <- input
+		fromProcessing <- speech.Compose(input)
 	}
 }
 
@@ -47,7 +52,7 @@ user.
 func speak(fromProcessing chan string) {
 	for {
 		prompt()
-		fmt.Println(<-fromProcessing)
+		speech.Speak(<-fromProcessing)
 	}
 }
 
